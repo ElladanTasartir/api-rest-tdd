@@ -4,6 +4,7 @@ Esse repositório tem o intuito de servir apenas como base de estudos sobre TDD 
 
 ###### Jest: Framework de testes
 Após instalar a dependência de desenvolvimento jest através de: 
+
 ```yarn add jest -D```
 
 ou
