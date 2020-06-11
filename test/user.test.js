@@ -2,6 +2,8 @@ const request = require('supertest');
 
 const app = require('../src/app');
 
+// consign é uma dependência que faz o gerenciamento de arquivos na aplicação
+
 test('Deve listar todos os usuários', () => {
   return request(app)
     .get('/users')
@@ -9,5 +11,15 @@ test('Deve listar todos os usuários', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
       expect(res.body[0]).toHaveProperty('name', 'John Doe');
+    });
+});
+
+test('Deve inserir usuário com sucesso', () => {
+  return request(app)
+    .post('/users')
+    .send({ name: 'Walter Mitty', email: 'walter@mail.com' })
+    .then((res) => {
+      expect(res.status).toBe(201); // status para quando um recurso é criado
+      expect(res.body.name).toBe('Walter Mitty');
     });
 });
