@@ -1,4 +1,8 @@
-### TDD - Test Driven Development 💻
+<p align="center">
+<img src="./assets/REST-TDD.png">
+</p>
+
+<h2 align="center">TDD - Test Driven Development 💻</h2>
 
 Esse repositório tem o intuito de servir apenas como base de estudos sobre TDD utilizando de uma API Rest para servir os dados e os testes para validar esses dados.
 
@@ -23,9 +27,16 @@ Para criação de migrations foi utilizado o comando:
 
 Para a execução das migrations:
 
-`npx knex migrate:latest  --env test`
-* O latest significa que ele executará a versão das migrations mais recentes
+`npx knex migrate:latest --env test`
+
+- O latest significa que ele executará a versão das migrations mais recentes
 
 Para o rollback:
 
-`npx knex migrate:rollback  --env test`
+`npx knex migrate:rollback --env test`
+
+###### Instalada uma lib para realizar os logs do banco de dados chamada knex-logger
+
+É uma lib bem desatualizada, funciona bem, mas pela falta de suporte pode não ser tão interessante assim tê-la no projeto.
+
+Utiliza um middleware para loggar as querys realizadas dentro do banco pelo Knex.
