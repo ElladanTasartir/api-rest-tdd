@@ -16,6 +16,7 @@ app.db = knex(knexfile.test);
 // consign recebe um objeto de configuração onde podemos falar qual o diretório padrão que o consign vai estar olhando
 consign({ cwd: 'src', verbose: false })
   .include('./config/middlewares.js')
+  .then('./services')
   .then('./routes') // para incluir mais arquivos, no caso, incluiremos uma pasta para pegar todos os seus arquivos e ligar ao app
   .then('./config/routes.js')
   .into(app);
