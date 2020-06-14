@@ -21,19 +21,17 @@ Os testes podem ser encontrados na pasta teste com alguns comentários explicand
 
 ###### Nesse repositório foi utilizado o Postgres como base de dados e o KnexJS como Query builder
 
-Para criação de migrations foi utilizado o comando:
+Para criação de migrations:
 
 `npx knex migrate:make nome_migration --env test`
 
 Para a execução das migrations:
 
-`npx knex migrate:latest --env test`
-
-- O latest significa que ele executará a versão das migrations mais recentes
+`yarn knex-latest`
 
 Para o rollback:
 
-`npx knex migrate:rollback --env test`
+`yarn knex-rollback`
 
 ###### Instalada uma lib para realizar os logs do banco de dados chamada knex-logger
 
