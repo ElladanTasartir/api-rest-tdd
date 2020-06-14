@@ -26,3 +26,75 @@ test('Deve inserir uma conta com sucesso', () => {
       expect(result.body.name).toBe('Acc #1');
     });
 });
+
+test('Não deve inserir uma conta sem nome', () => {
+  return request(app)
+    .post(mainRoute)
+    .send({ user_id: user.id })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('Nome é um atributo obrigatório');
+    });
+});
+
+test.skip('Não deve inserir uma conta de nome duplicado, para o mesmo usuário', () => {});
+
+test('Deve listar todas as contas', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc list', user_id: user.id })
+    .then(() => request(app).get(mainRoute))
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThan(0);
+    });
+});
+
+test.skip('Deve listar apenas as contas do usuário', () => {});
+
+test('Deve retornar uma conta por Id', () => {
+  return (
+    app
+      .db('accounts')
+      // informa para o knex que quer que retorne apenas o id
+      .insert({ name: 'Acc By Id', user_id: user.id }, ['id'])
+      // retorna uma lista com os usuários inseridos, no caso, apenas 1
+      .then((acc) => request(app).get(`${mainRoute}/${acc[0].id}`))
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body.name).toBe('Acc By Id');
+        expect(res.body.user_id).toBe(user.id);
+      })
+  );
+});
+
+test.skip('Não deve retornar uma conta de outro usuário', () => {});
+
+test('Deve alterar uma conta', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc To Update', user_id: user.id }, ['id'])
+    .then((acc) =>
+      request(app)
+        .put(`${mainRoute}/${acc[0].id}`)
+        .send({ name: 'Acc Updated' }),
+    )
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.name).toBe('Acc Updated');
+    });
+});
+
+test.skip('Não deve alterar uma conta de outro usuário', () => {});
+
+test('Deve remover uma conta', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc to remove', user_id: user.id }, ['id'])
+    .then((acc) => request(app).delete(`${mainRoute}/${acc[0].id}`))
+    .then((res) => {
+      expect(res.status).toBe(204); // Resposta sem conteúdo, pois removemos
+    });
+});
+
+test.skip('Não deve remover uma conta de outro usuário', () => {});
