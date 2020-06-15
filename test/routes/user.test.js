@@ -1,13 +1,27 @@
 const request = require('supertest');
+const jwt = require('jwt-simple');
 
 const app = require('../../src/app');
 
 const mail = `${Date.now()}@mail.com`;
 // consign é uma dependência que faz o gerenciamento de arquivos na aplicação
 
+let user;
+
+beforeAll(async () => {
+  const res = await app.services.user.save({
+    name: 'User Account',
+    mail: `${Date.now()}@mail.com`,
+    passwd: '123456',
+  });
+  user = { ...res[0] };
+  user.token = jwt.encode(user, 'Segredo!');
+});
+
 test('Deve listar todos os usuários', () => {
   return request(app)
     .get('/users')
+    .set('authorization', `bearer ${user.token}`)
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(0);
