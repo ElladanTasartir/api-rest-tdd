@@ -38,3 +38,5 @@ Para o rollback:
 É uma lib bem desatualizada, funciona bem, mas pela falta de suporte pode não ser tão interessante assim tê-la no projeto.
 
 Utiliza um middleware para loggar as querys realizadas dentro do banco pelo Knex.
+
+###### Instalada a dependência JWT Simple para a autenticação de usuários
