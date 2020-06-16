@@ -1,13 +1,17 @@
+const express = require('express');
+
 module.exports = (app) => {
-  const findAll = (req, res, next) => {
+  const router = express.Router();
+
+  router.get('/', (req, res, next) => {
     // O objeto retornado no knex() é uma função que quando executa, é possível realizar querys
     app.services.user
       .findAll()
       .then((result) => res.status(200).json(result))
       .catch((err) => next(err));
-  };
+  });
 
-  const create = async (req, res, next) => {
+  router.post('/', async (req, res, next) => {
     try {
       const user = await app.services.user.save(req.body);
       // Pode-se inserir mais de um registro de uma vez através do knex
@@ -19,7 +23,7 @@ module.exports = (app) => {
     } catch (err) {
       next(err);
     }
-  };
+  });
 
-  return { findAll, create };
+  return router;
 };

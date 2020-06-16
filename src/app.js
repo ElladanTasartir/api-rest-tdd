@@ -15,7 +15,7 @@ consign({ cwd: 'src', verbose: false })
   .then('./config/middlewares.js')
   .then('./services')
   .then('./routes') // para incluir mais arquivos, no caso, incluiremos uma pasta para pegar todos os seus arquivos e ligar ao app
-  .then('./config/routes.js')
+  .then('./config/router.js')
   .into(app);
 
 app.get('/', (req, res) => {
