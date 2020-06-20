@@ -4,8 +4,11 @@ const app = require('../../src/app');
 
 const mainRoute = '/v1/accounts';
 let user;
+let user2;
 
-beforeAll(async () => {
+beforeEach(async () => {
+  // para criar um novo usuário para cada teste
+  // Usamos o beforeEach
   // Método do jest que recebe como parâmetro um callback e um timeout
   // Esse método é responsável por executar esse callback antes de todos os testes
   // O timeout é responsável por especificar o tanto de tempo em milissegundos
@@ -17,12 +20,18 @@ beforeAll(async () => {
   });
   user = { ...res[0] };
   user.token = jwt.encode(user, 'Segredo!');
+  const res2 = await app.services.user.save({
+    name: 'User Account #2',
+    mail: `${Date.now()}@mail.com`,
+    passwd: '123456',
+  });
+  user2 = { ...res2[0] };
 });
 
 test('Deve inserir uma conta com sucesso', () => {
   return request(app)
     .post(mainRoute)
-    .send({ name: 'Acc #1', user_id: user.id })
+    .send({ name: 'Acc #1' })
     .set('authorization', `bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(201);
@@ -33,7 +42,7 @@ test('Deve inserir uma conta com sucesso', () => {
 test('Não deve inserir uma conta sem nome', () => {
   return request(app)
     .post(mainRoute)
-    .send({ user_id: user.id })
+    .send({})
     .set('authorization', `bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
@@ -41,22 +50,41 @@ test('Não deve inserir uma conta sem nome', () => {
     });
 });
 
-test.skip('Não deve inserir uma conta de nome duplicado, para o mesmo usuário', () => {});
-
-test('Deve listar todas as contas', () => {
+test('Não deve inserir uma conta de nome duplicado, para o mesmo usuário', () => {
   return app
     .db('accounts')
-    .insert({ name: 'Acc list', user_id: user.id })
+    .insert({ name: 'Acc duplicada', user_id: user.id })
+    .then(() =>
+      request(app)
+        .post(mainRoute)
+        .set('authorization', `bearer ${user.token}`)
+        .send({
+          name:
+            'Acc duplicada' /* Não precisa informar o id porque o token já informa */,
+        }),
+    )
+    .then((res) => {
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Já existe uma conta com este nome');
+    });
+});
+
+test('Deve listar apenas as contas do usuário', () => {
+  return app
+    .db('accounts')
+    .insert([
+      { name: 'Acc User #1', user_id: user.id },
+      { name: 'Acc User #2', user_id: user2.id },
+    ])
     .then(() =>
       request(app).get(mainRoute).set('authorization', `bearer ${user.token}`),
     )
     .then((res) => {
       expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].name).toBe('Acc User #1');
     });
 });
-
-test.skip('Deve listar apenas as contas do usuário', () => {});
 
 test('Deve retornar uma conta por Id', () => {
   return (
@@ -78,7 +106,20 @@ test('Deve retornar uma conta por Id', () => {
   );
 });
 
-test.skip('Não deve retornar uma conta de outro usuário', () => {});
+test('Não deve retornar uma conta de outro usuário', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) =>
+      request(app)
+        .get(`${mainRoute}/${acc[0].id}`)
+        .set('authorization', `bearer ${user.token}`),
+    )
+    .then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('Este recurso não pertence ao usuário');
+    });
+});
 
 test('Deve alterar uma conta', () => {
   return app
@@ -96,7 +137,21 @@ test('Deve alterar uma conta', () => {
     });
 });
 
-test.skip('Não deve alterar uma conta de outro usuário', () => {});
+test('Não deve alterar uma conta de outro usuário', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) =>
+      request(app)
+        .put(`${mainRoute}/${acc[0].id}`)
+        .send({ name: 'Acc Updated' })
+        .set('authorization', `bearer ${user.token}`),
+    )
+    .then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('Este recurso não pertence ao usuário');
+    });
+});
 
 test('Deve remover uma conta', () => {
   return app
@@ -112,4 +167,18 @@ test('Deve remover uma conta', () => {
     });
 });
 
-test.skip('Não deve remover uma conta de outro usuário', () => {});
+test('Não deve remover uma conta de outro usuário', () => {
+  return app
+    .db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) =>
+      request(app)
+        .delete(`${mainRoute}/${acc[0].id}`)
+        .send({ name: 'Acc Updated' })
+        .set('authorization', `bearer ${user.token}`),
+    )
+    .then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('Este recurso não pertence ao usuário');
+    });
+});

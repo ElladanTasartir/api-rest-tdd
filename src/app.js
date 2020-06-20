@@ -30,6 +30,7 @@ app.use((err, req, res, next) => {
   if (name === 'ValidationError') res.status(400).json({ error: message });
   // Se não for um dos erros que já preparamos nas rotas, provavelmente é
   // Um erro de servidor, então enviamos o status 500
+  if (name === 'AuthError') res.status(403).json({ error: message });
   else res.status(500).json({ name, message, stack });
   next();
 });
